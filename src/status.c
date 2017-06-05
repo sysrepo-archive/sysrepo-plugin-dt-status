@@ -12,6 +12,7 @@
 #include "sysrepo/plugins.h"
 #include "sysrepo/values.h"
 #include "status.h"
+#include <libubox/list.h>
 
 #define XPATH_MAX_LEN 100
 #define XPATH_MAX_LEN 100
@@ -820,6 +821,12 @@ commit_to_uci(struct model *model)
         fprintf(stderr, "trunk_to_uci error %d\n", rc);
     }
 
+    /* Restart network service. */
+    rc = system("/etc/init.d/network restart");
+    if (0 > rc) {
+      fprintf(stderr, "Can't restart 'network service' %d\n", rc);
+    }
+
     return rc;
 }
 
@@ -864,6 +871,7 @@ sr_plugin_init_cb(sr_session_ctx_t *session, void **private_ctx)
     model->wifi_devs = &devs;
     model->ubus_ctx = NULL;
     model->uci_ctx = NULL;
+    fprintf(stderr, "SR PLUGIN INIT CB\n");
 
     init_data(model);
     set_values(session, model->board, model->wifi_devs, model->wifi_ifs, model->leases);
